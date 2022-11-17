@@ -18,7 +18,7 @@ function SEO(props) {
 
       <meta property="og:url" content="https://swaps.mycelium.xyz" />
       <meta property="og:type" content={meta.type} />
-      <meta property="og:site_name" content="Mycelium Perpetual Swaps" />
+      <meta property="og:site_name" content="Arbitrex Perpetual DEX" />
       <meta property="og:description" content={meta.description} />
       <meta property="og:title" content={meta.title} />
       <meta property="og:image" content={image} />

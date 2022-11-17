@@ -345,7 +345,7 @@ export default function Referral(props) {
     <>
       <SEO
         title={getPageTitle("Referral")}
-        description="Use a referral code on Mycelium Perpetual Swaps to earn rebates on trading fees."
+        description="Use a referral code on Arbitrex Perpetual DEX to earn rebates on trading fees."
       />
       <EnterCodeModal
         active={active}
@@ -379,9 +379,7 @@ export default function Referral(props) {
             [LEADERBOARD]: <LeaderboardHeader />,
           }[currentView]
         }
-        
-        
       </Styles.StyledReferralPage>
-    </> 
-  ); 
+    </>
+  );
 }

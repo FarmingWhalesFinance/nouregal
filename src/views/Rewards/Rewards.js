@@ -327,7 +327,7 @@ export default function Rewards(props) {
     <>
       <SEO
         title={getPageTitle("Rewards")}
-        description="Claim fees earned via being in the top 5% of traders on Mycelium Perpetual Swaps."
+        description="Claim fees earned via being in the top 5% of traders on Arbitrex Perpetual DEX."
       />
       <Styles.StyledRewardsPage className="default-container page-layout">
         {

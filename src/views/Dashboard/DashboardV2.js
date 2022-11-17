@@ -437,7 +437,7 @@ export default function DashboardV2() {
     <>
       <SEO
         title={getPageTitle("Dashboard")}
-        description="View stats on Mycelium Perpetual Swaps, the MYC token, the MLP token and the MLP liquidity pool."
+        description="View stats on Arbitrex Perpetual DEX, the MYC token, the MLP token and the MLP liquidity pool."
       />
       <div className="default-container DashboardV2 page-layout">
         <div className="section-title-block">
