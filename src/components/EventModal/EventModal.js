@@ -17,8 +17,8 @@ const EVENTS = {
     ),
     description: (
       <span>
-        Users can now auto deposit esMYC into the vesting contract and claim Market Making Rewards via selling a portion
-        of their MLP position
+        Users can now auto deposit esARBX into the vesting contract and claim Market Making Rewards via selling a portion
+        of their ARBXLP position
       </span>
     ),
     continueLink: "/earn",
@@ -31,7 +31,7 @@ const EVENTS = {
         {/* <h2>Fee-Free Spree</h2> */}
       </>
     ),
-    description: <span>Mycelium now supports limit orders for opening and closing leveraged positions!</span>,
+    description: <span>Arbitrex now supports limit orders for opening and closing leveraged positions!</span>,
   },
   "disable-limit-orders": {
     title: (
@@ -45,7 +45,8 @@ const EVENTS = {
         to be updated.
       </span>
     ),
-  }
+  },
+ 
 };
 
 export default function EventModal({
@@ -74,34 +75,12 @@ export default function EventModal({
     <Styled.EventModal isVisible={isModalVisible} setIsVisible={setEventModalVisible} hideHeader={hideHeader}>
       {!hideHeader && (
         <Styled.EventModalHeader>
-          <Styled.ReferralsCompHeader>
-            <Styled.ReferralsCompAmount />
-            <Styled.ReferralsCompPrizeText>USDC in prizes</Styled.ReferralsCompPrizeText>
-          </Styled.ReferralsCompHeader>
-          <Styled.EventModalGraphic infront src={ethMergeHeader} alt="Event modal header graphic" />
-          <Styled.EventModalGraphic src={ethMergeHeadermesh} alt="Event modal header mesh" />
+          
         </Styled.EventModalHeader>
       )}
       <Styled.EventModalContent>
-        <Styled.EventModalTitle>{event.title}</Styled.EventModalTitle>
-        <Styled.EventModalButtonContent className="Button-content">
-          <Styled.EventModalCloseButton onClick={onClose} />
-          {event.description}
-          {twitterText && (
-            <button className="App-button-option App-card-option" onClick={() => shareToTwitter(twitterText)}>
-              <img src={twitterIcon} alt="Twitter" /> {twitterButtonText ? twitterButtonText : "Share on Twitter"}
-            </button>
-          )}
-          {event.continueLink ? (
-            <Link to={event.continueLink} onClick={onClose} className="App-button-option App-card-option">
-              {event.continueLinkText ? event.continueLinkText : `Continue`}
-            </Link>
-          ) : (
-            <button className="App-button-option App-card-option" onClick={onClose}>
-              {event.continueLinkText ? event.continueLinkText : `Continue`}
-            </button>
-          )}
-        </Styled.EventModalButtonContent>
+       
+        
       </Styled.EventModalContent>
     </Styled.EventModal>
   );

@@ -12,7 +12,6 @@ import Router from "../abis/Router.json";
 import LentMyc from "../abis/LentMyc.json";
 import UniPool from "../abis/UniPool.json";
 import Token from "../abis/Token.json";
-import RewardsTracker from "../abis/RewardTracker.json";
 
 import { getContract } from "../Addresses";
 import { getConstant } from "../Constants";
@@ -32,8 +31,8 @@ import {
   helperToast,
   USD_DECIMALS,
   ETH_DECIMALS,
+  FORTNIGHTS_IN_YEAR,
   ARBITRUM_GOERLI,
-  SECONDS_PER_YEAR
 } from "../Helpers";
 import { getTokenBySymbol } from "../data/Tokens";
 
@@ -1063,46 +1062,76 @@ function ToastifyDebug(props) {
 export function useStakingApr(mycPrice, ethPrice) {
   const [stakingApr, setStakingApr] = useState(null);
 
-  // apr is annualised rewards (USD value) / total staked (USD value) * 100
-  const { data: tokensPerInterval } = useSWR(
-    [`useStakingApr:tokensPerInterval:${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "MYCStakingRewards"), "tokensPerInterval"],
+  const { data: currentCycle } = useSWR(
+    [`useStakingApr:currentCycle:${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "LentMYC"), "cycle"],
     {
-      fetcher: fetcher(undefined, RewardsTracker),
+      fetcher: fetcher(undefined, LentMyc),
     }
   );
 
-  const mycTokenAddress = getContract(ARBITRUM, 'MYC');
-  const { data: mycDeposited } = useSWR(
-    [`useStakingApr:totalDepositSupply(MYC):${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "MYCStakingRewards"), "totalDepositSupply"],
+  const cycle = currentCycle?.toNumber();
+
+  const { data: mycAssetsInStaking } = useSWR(
+    cycle
+      ? [`useStakingApr:mycInStaking:${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "LentMYC"), "totalAssets"]
+      : null,
     {
-      fetcher: fetcher(undefined, RewardsTracker, mycTokenAddress)
+      fetcher: fetcher(undefined, LentMyc),
     }
   );
 
-  const esMycTokenAddress = getContract(ARBITRUM, 'ES_MYC');
-  const { data: esMycDeposited } = useSWR(
-    [`useStakingApr:totalDepositSupply(esMYC):${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "MYCStakingRewards"), "totalDepositSupply"],
+  const { data: pendingMycDepositsInStaking } = useSWR(
+    cycle
+      ? [`useStakingApr:pendingMycInStaking:${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "LentMYC"), "pendingDeposits"]
+      : null,
     {
-      fetcher: fetcher(undefined, RewardsTracker, esMycTokenAddress)
+      fetcher: fetcher(undefined, LentMyc),
+    }
+  );
+
+  const { data: prev } = useSWR(
+    cycle
+      ? [`useStakingApr:prev:${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "LentMYC"), "cycleCumulativeEthRewards"]
+      : null,
+    {
+      fetcher: fetcher(undefined, LentMyc, [cycle - 2]),
+    }
+  );
+
+  const { data: current } = useSWR(
+    cycle
+      ? [`useStakingApr:current:${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "LentMYC"), "cycleCumulativeEthRewards"]
+      : null,
+    {
+      fetcher: fetcher(undefined, LentMyc, [cycle - 1]),
+    }
+  );
+
+  const { data: cycleAssets } = useSWR(
+    cycle
+      ? [`useStakingApr:cycleAssets:${ARBITRUM}`, ARBITRUM, getContract(ARBITRUM, "LentMYC"), "cycleSharesAndAssets"]
+      : null,
+    {
+      fetcher: fetcher(undefined, LentMyc, [cycle - 1]),
     }
   );
 
   useEffect(() => {
-    if(ethPrice?.gt(0) && mycPrice?.gt(0) && tokensPerInterval && mycDeposited && esMycDeposited) {
+    const values = [mycAssetsInStaking, pendingMycDepositsInStaking, ethPrice, mycPrice, current, prev, cycleAssets];
+    if (values.every(Boolean)) {
+      const cycleEthRewardsPerShare = current.sub(prev);
+      const cycleSupply = cycleAssets[0];
+      const cycleEthRewards = cycleEthRewardsPerShare.mul(cycleSupply).div(ethers.BigNumber.from(10).pow(18));
+      const ethDistributed = cycleEthRewards;
+      const mycDeposited = mycAssetsInStaking.add(pendingMycDepositsInStaking).div(expandDecimals(1, ETH_DECIMALS));
+      const mycUSDValue = mycDeposited.mul(mycPrice);
+      const ethUSDValue = ethDistributed.mul(ethPrice);
 
-      const tokensPerYear = tokensPerInterval.mul(SECONDS_PER_YEAR);
-      const annualRewardsUsd = tokensPerYear.mul(ethPrice);
-
-      const totalDepositTokens = mycDeposited.add(esMycDeposited);
-      const totalDepositsUsd = totalDepositTokens.mul(mycPrice);
-
-      const aprPrecision = 10;
-      const apr = annualRewardsUsd.mul(expandDecimals(1, aprPrecision)).div(totalDepositsUsd);
-
-      const formattedApr = apr.toNumber() / (10 ** aprPrecision) * 100;
-      setStakingApr(formattedApr.toFixed(2));
+      const aprPercentageForCycle = ethers.utils.formatUnits(ethUSDValue.div(mycUSDValue));
+      const aprPercentageYearly = parseFloat(aprPercentageForCycle) * FORTNIGHTS_IN_YEAR * 100;
+      setStakingApr(aprPercentageYearly.toFixed(2));
     }
-  }, [ethPrice, mycPrice, tokensPerInterval, mycDeposited, esMycDeposited]);
+  }, [mycAssetsInStaking, pendingMycDepositsInStaking, ethPrice, mycPrice, current, prev, cycleAssets]);
 
   return stakingApr;
 }
