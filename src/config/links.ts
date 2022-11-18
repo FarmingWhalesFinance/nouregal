@@ -1,4 +1,4 @@
-export const discord = "https://discord.gg/XAYdmhEhxq";
+export const discord = "https://discord.com/invite/QSQRaTZ3bd";
 export const medium = "https://medium.com/@arbitrex";
 export const docs = "https://arbitrex.gitbook.io/arbitrex/arbitrex/about-arbitrex";
 export const swapsDocs = "https://swaps.docs.mycelium.xyz";

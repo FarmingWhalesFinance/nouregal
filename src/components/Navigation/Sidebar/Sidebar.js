@@ -89,7 +89,7 @@ const socialLinks = [
   },
   {
     name: "Discord",
-    path: "https://discord.gg/XAYdmhEhxq",
+    path: "https://discord.com/invite/QSQRaTZ3bd",
     icon: DiscordIcon,
   },
 ];
